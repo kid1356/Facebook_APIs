@@ -28,12 +28,13 @@ SECRET_KEY = 'django-insecure-&8(e!&q*d$-3!%o%1+o!58qzuw*smef+&n5nzm3^!j=u$hzm61
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'user',
     'messanger',
     'posting_blogs',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -76,8 +78,11 @@ TEMPLATES = [
         },
     },
 ]
-
+ASGI_APPLICATION = 'facebook.asgi.application'
 WSGI_APPLICATION = 'facebook.wsgi.application'
+
+
+
 
 
 # Database
@@ -90,6 +95,11 @@ DATABASES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -108,6 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
 
 
 # Internationalization
