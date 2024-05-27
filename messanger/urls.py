@@ -9,6 +9,7 @@ urlpatterns = [
     path('receive-message/',ReceiverView.as_view(), name = 'received-messages'),
     path('delete-message/<int:id>',DeleteMessageView.as_view(), name = 'delete-messages'),
     # path('ws/chat/<int:user_id>/', ChatConsumer.as_asgi()),
+    path('api/private-chat/init/<int:user_id>/', PrivateChatInitView.as_view(), name='private-chat-init'),
 
 ]
 

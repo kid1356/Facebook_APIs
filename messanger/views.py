@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from .utils import generate_private_room_name
+from user.models import User
 # Create your views here.
 
 
@@ -50,4 +52,16 @@ class DeleteMessageView(APIView):
            
         
 
-    
+class PrivateChatInitView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id, *args, **kwargs):
+        if not user_id:
+            return Response({"error": "User ID is required"}, status=400)
+        
+        other_user = User.objects.filter(id=user_id).first()
+        if not other_user:
+            return Response({"error": "User does not exist"}, status=404)
+        
+        room_name = generate_private_room_name(request.user.id, other_user.id)
+        return Response({"room_name": room_name})
