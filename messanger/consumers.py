@@ -1,11 +1,18 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from messanger.utils import *
 
 class ChatConsumer(AsyncWebsocketConsumer):
     
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_name = self.scope['url_route']['kwargs'].get('room_name')
+        self.encoded_room_name = self.scope['url_route']['kwargs'].get('encoded_room_name')
+        
+        if self.encoded_room_name:
+            self.room_name = decode_private_room_name(self.encoded_room_name)
+
+
         self.room_group_name = self.get_room_group_name(self.room_name)
         self.user = self.scope["user"]
         if not self.user.is_authenticated:
