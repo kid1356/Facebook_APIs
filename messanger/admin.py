@@ -4,3 +4,5 @@ from .models import *
 @admin.register(Messages)
 class  messages(admin.ModelAdmin):
     list_display = ['id','sender','receiver','text','time_stamp']
+
+

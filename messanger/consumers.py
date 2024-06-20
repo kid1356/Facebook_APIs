@@ -54,7 +54,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "user":event["user"]
             }
             ))
-        
+    
+
+
+
     def get_room_group_name(self,room_name):
         if room_name.startswith("private_"):
             return f"private_chat_{room_name}"
@@ -68,3 +71,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             allowed_users = {int(user1_id), int(user2_id)}
             return user.id in allowed_users
         return True
+    
+
+

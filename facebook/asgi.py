@@ -9,6 +9,7 @@ from .custom_auth import CustomAuthMiddleware
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from messanger.routing import websocket_patterns 
+from posting_blogs.routing import websocket_patterns
 
 
 

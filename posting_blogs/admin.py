@@ -16,4 +16,6 @@ class BlogAdmin(admin.ModelAdmin):
 
     get_likes_count.short_description = 'Likes Count'
 
-    
+@admin.register(Notification)
+class notify(admin.ModelAdmin):
+    list_display = ['id','message']
