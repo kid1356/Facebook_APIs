@@ -51,7 +51,7 @@ class BlogSerializer(serializers.ModelSerializer):
 
 class BlogLikeSerializer(serializers.Serializer):
     blog_id = serializers.IntegerField()
-    like = serializers.BooleanField()
+    # like = serializers.BooleanField()
 
     
 

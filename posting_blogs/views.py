@@ -69,7 +69,7 @@ class Like_Blog_view(APIView):
         serializer =BlogLikeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         blog_id = serializer.validated_data['blog_id']
-        like = serializer.validated_data['like']
+        # like = serializer.validated_data['like']
         user = request.user
 
         try:
@@ -77,12 +77,14 @@ class Like_Blog_view(APIView):
         except Blogs.DoesNotExist:
             return Response({'Blog Not found'},status=status.HTTP_404_NOT_FOUND)
 
-        if like:
-            blog.likes.add(user)
+        if user in blog.likes.all():
+            blog.likes.remove(user)
+            message = 'Unliked successfully'
         else:
-            blog.likes.remove(user)  
+            blog.likes.add(user)
+            message = 'Liked successfully'
 
-        return Response({'Like and unlike successfully'},status=status.HTTP_200_OK)     
+        return Response({"message":message},status=status.HTTP_200_OK)     
 
 
 

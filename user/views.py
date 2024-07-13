@@ -5,7 +5,7 @@ from rest_framework import status,viewsets
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .permissions import *
 # Create your views here.
 
@@ -90,3 +90,31 @@ class ForgetPasswordView(APIView):
         return Response("Password change successfully", status=status.HTTP_200_OK)
 
 
+
+class ActiveUserView(APIView):
+    permission_classes = [IsAuthenticated,IsAdminUser]
+    def patch(self, request,id):
+        try:
+            user = User.objects.get(id=id)
+
+        except User.DoesNotExist:
+            return Response("User does not found", status=status.HTTP_404_NOT_FOUND)
+        
+        user.is_active = True
+        user.save()
+
+        return Response("user is active Successfully",status=status.HTTP_200_OK)
+    
+class DeActiveUserView(APIView):
+    permission_classes = [IsAdminUser,IsAuthenticated]
+
+    def patch(self,request,id):
+        try:
+            user = User.objects.get(id=id)
+
+        except User.DoesNotExist:
+            return Response("User does not exists",status=status.HTTP_404_NOT_FOUND)
+        
+        user.is_active = False
+        user.save()
+        return Response("user in unactive successfully", status=status.HTTP_200_OK)

@@ -23,15 +23,19 @@ def comment_created(sender, instance, created, **kwargs):
         )
 
 @receiver(m2m_changed, sender=Blogs.likes.through)
-def like_post(sender, instance, action, **kwargs):
+def like_post(sender, instance, action, reverse,pk_set,**kwargs):
     if action == "post_add":
-        user = instance.user
-        message = f"Someone liked your post."
-        notification = Notification.objects.create(user=user, message=message)
+
+        liker_user_id = list(pk_set)[0]
+        liker_user = User.objects.get(id=liker_user_id)
+
+        author = instance.user
+        message = f"{liker_user.first_name} liked your post."
+        notification = Notification.objects.create(user=author, message=message)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            f"notifications_{user.id}",
+            f"notifications_{author.id}",
             {
                 "type": "send_notification",
                 "notification": notification.message
