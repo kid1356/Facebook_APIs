@@ -13,8 +13,8 @@ urlpatterns = [
     path('update/<int:id>/', UpdateUserInfoView.as_view(), name = 'update-info'),
     path('forget-password-email/', ForgetPasswordEmailView.as_view(), name = 'send-email'),
     path('forget-password/', ForgetPasswordView.as_view(), name = 'forget-password-recovery'),
-    path('activate-user/<int:id>/', ActiveUserView.as_view(), name = 'active-user'),
-    path('deactivate-user/<int:id>/', DeActiveUserView.as_view(), name = 'de-active-user'),
+    path('admin/activate-user/<int:id>/', ActiveUserView.as_view(), name = 'active-user'),
+    path('admin/deactivate-user/<int:id>/', DeActiveUserView.as_view(), name = 'de-active-user'),
     
     
 ]

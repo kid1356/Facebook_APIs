@@ -41,8 +41,12 @@ class LoginView(APIView):
         if user is not None:
 
             token=generated_token(user)
-
-            return Response({'token':token,'user':serializer.data, 'msg':f'welcome {user.first_name}'}, status=status.HTTP_200_OK)
+            
+            if user.is_admin:
+                message = f"welcome Admin '{user.first_name}'"
+            else:
+                message = f"welcome {user.first_name}"
+            return Response({'token':token,'user':serializer.data, 'msg':message}, status=status.HTTP_200_OK)
         return Response('Login credential is Invalid', status=status.HTTP_404_NOT_FOUND)
 
 
