@@ -8,7 +8,7 @@ from .custom_auth import CustomAuthMiddleware
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
-from messanger.routing import websocket_patterns 
+from messanger.routing import websocket_patterns as chats_socket_patterns
 from posting_blogs.routing import websocket_patterns
 
 
@@ -25,7 +25,7 @@ application = ProtocolTypeRouter(
         "websocket" : AllowedHostsOriginValidator(
             CustomAuthMiddleware(
                 URLRouter(
-                    websocket_patterns
+                    websocket_patterns + chats_socket_patterns
                 )
             )
         )
