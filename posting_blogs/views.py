@@ -2,7 +2,7 @@ from django.shortcuts import render
 from user.views import *
 from .serializers import *
 from .models import *
-from django.http import HttpRequest
+from rest_framework.pagination import PageNumberPagination
 
 #custom permissions
 class IsOwnerOfBlog(BasePermission):
@@ -21,6 +21,23 @@ class Blog_Create_view(APIView):
         serializer.save(user = request.user)
 
         return Response({'The Blogs is Posted':serializer.data},status=status.HTTP_201_CREATED)
+
+
+class GetAllUserBlogsView(APIView):
+    def get(self,request,user_id):
+        try:
+            user = Blogs.objects.filter(user_id=user_id)
+        except User.DoesNotExist:
+            return Response("User blogs not found",status=status.HTTP_404_NOT_FOUND)
+        paginator = PageNumberPagination()
+        paginator.page_size = 3
+        result = paginator.paginate_queryset(user, request)
+
+        serializer = BlogSerializer(result,many = True)
+
+        return paginator.get_paginated_response(serializer.data)
+
+        
 
 
 class Blog_Get_view(APIView):
@@ -108,7 +125,23 @@ class Comment_Get_view(APIView):
         except Comment.DoesNotExist:
             return Response("comment does not found", status=status.HTTP_404_NOT_FOUND)
         
+class GetAllUserCommentsView(APIView):
+    def get(self,request,user_id):
+        try:
+            user = Comment.objects.filter(user_id=user_id)
+        except Comment.DoesNotExist:
+            return Response("User comments not found", status=status.HTTP_404_NOT_FOUND)
 
+        paginator = PageNumberPagination()
+        paginator.page_size = 3
+        result = paginator.paginate_queryset(user, request)
+
+        serializer = CommentSerializer(result, many = True)
+
+        return paginator.get_paginated_response(serializer.data)     
+
+    
+        
 class Comment_Put_view(APIView):
     permission_classes = [IsOwnerOfBlog]
     def put(self, request,id):
