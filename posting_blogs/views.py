@@ -16,16 +16,18 @@ class IsOwnerOfBlog(BasePermission):
 # Create your views here.  
 class Blog_Create_view(APIView):
     def post(self, request):
-        serializer = BlogSerializer(data= request.data)
+        serializer = BlogSerializer(data= request.data)         #posting Blogs 
         serializer.is_valid(raise_exception=True)
         serializer.save(user = request.user)
 
         return Response({'The Blogs is Posted':serializer.data},status=status.HTTP_201_CREATED)
 
 
+
+#Getting all blogs or post from a specific User
 class GetAllUserBlogsView(APIView):
     def get(self,request,user_id):
-        try:
+        try:                                                                
             user = Blogs.objects.filter(user_id=user_id)
         except User.DoesNotExist:
             return Response("User blogs not found",status=status.HTTP_404_NOT_FOUND)
@@ -39,7 +41,7 @@ class GetAllUserBlogsView(APIView):
 
         
 
-
+# getting single blogs by id
 class Blog_Get_view(APIView):
         
     def get(self,request,id):
@@ -50,22 +52,26 @@ class Blog_Get_view(APIView):
         except Blogs.DoesNotExist:
             return Response({"Blog not Found"},status=status.HTTP_404_NOT_FOUND)
 
+
+# Updating blog 
 class Blog_Put_view(APIView):   
     permission_classes = [IsOwnerOfBlog]
-    def put(self, request,id):
+    def patch(self, request,id):
         try:
             blog = Blogs.objects.get(id=id)
 
             self.check_object_permissions(request,blog)
 
-            serializer = BlogSerializer(blog, data=request.data)
+            serializer = BlogSerializer(blog, data=request.data, partial = True)
         
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({'updated successfully':serializer.data},status=status.HTTP_200_OK)
         except Blogs.DoesNotExist:
             return Response('Blog Does not FOund',status=status.HTTP_404_NOT_FOUND)
-    
+
+
+#Deleting blog
 class DeleteBlogView(APIView):
     permission_classes = [IsOwnerOfBlog]
     def delete(self, request,id):
@@ -81,6 +87,9 @@ class DeleteBlogView(APIView):
             return Response({"blog DOes not found or already deleted"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+# liking A blog
 class Like_Blog_view(APIView):
     def post(self,request,*args,**kwargs):
         serializer =BlogLikeSerializer(data=request.data)

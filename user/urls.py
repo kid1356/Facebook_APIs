@@ -13,8 +13,13 @@ urlpatterns = [
     path('update/<int:id>/', UpdateUserInfoView.as_view(), name = 'update-info'),
     path('forget-password-email/', ForgetPasswordEmailView.as_view(), name = 'send-email'),
     path('forget-password/', ForgetPasswordView.as_view(), name = 'forget-password-recovery'),
+    path('verify-otp/', OTPConfirmationView.as_view(), name = 'otp-confirmed'),
     path('admin/activate-user/<int:id>/', ActiveUserView.as_view(), name = 'active-user'),
     path('admin/deactivate-user/<int:id>/', DeActiveUserView.as_view(), name = 'de-active-user'),
+    path('admin/get-all-user/', AdminGetAllUserDetailList.as_view(), name = 'get-all-user'),
+    path('admin/get-user/<int:id>/', AdminUserDetailView.as_view(), name = 'get-a-user'),
+    path('admin/delete-user/<int:id>/', AdminUserDeleteView.as_view(), name = 'delete-a-user'),
+    path('admin/change-user-role/<int:id>/', AdminUserChangeRole.as_view(), name = 'change-user-role'),
     
     
 ]

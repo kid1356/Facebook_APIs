@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .serializers import *
 from rest_framework.views import APIView 
-from rest_framework import status,viewsets
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -84,19 +84,29 @@ class ForgetPasswordEmailView(APIView):
         serializer.is_valid(raise_exception=True)
         
         return Response("An email is sent Please Check Your Mail Box",status=status.HTTP_200_OK)
-    
+
+class OTPConfirmationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request):
+        serializer = OTPVerifySerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+
+        return Response("Your OTP is Confirmed, please reset your password",status=status.HTTP_200_OK)
+
+
 class ForgetPasswordView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
-        serializer = ForgetPasswordSerializer(data=request.data, context = {'user':request.user})
+        serializer = ForgetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        serializer.save()
         return Response("Password change successfully", status=status.HTTP_200_OK)
 
 
 
 class ActiveUserView(APIView):
-    permission_classes = [IsAuthenticated,IsAdminUser]
+    permission_classes = [IsAdminUser]
     def patch(self, request,id):
         try:
             user = User.objects.get(id=id)
@@ -110,7 +120,7 @@ class ActiveUserView(APIView):
         return Response("user is active Successfully",status=status.HTTP_200_OK)
     
 class DeActiveUserView(APIView):
-    permission_classes = [IsAdminUser,IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
     def patch(self,request,id):
         try:
@@ -122,3 +132,55 @@ class DeActiveUserView(APIView):
         user.is_active = False
         user.save()
         return Response("user in unactive successfully", status=status.HTTP_200_OK)
+    
+
+class AdminGetAllUserDetailList(APIView):
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        users = User.objects.all().order_by('id')
+        serializer = UserProfileSerializer(users, many  =True)
+
+        return Response({"All Users:":serializer.data}, status=status.HTTP_200_OK)
+    
+class AdminUserDetailView(APIView):
+    permission_classes =[IsAdminUser]
+    def get(self,request,id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response("User does not exist",status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = RegisterSerilizer(user)
+
+        return Response({"User detail":serializer.data},status=status.HTTP_200_OK)
+
+class AdminUserDeleteView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def delete(self, request,id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response("User does not exist",status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = RegisterSerilizer(user)
+        deleted_user = serializer.data
+        user.delete()
+
+        return Response({"user is deleted":deleted_user}, status=status.HTTP_200_OK)
+    
+
+class AdminUserChangeRole(APIView):
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request,id):
+        try:
+            user= User.objects.get(id=id)
+
+        except User.DoesNotExist:
+            return Response("User does not exist",status=status.HTTP_404_NOT_FOUND)
+        
+        user.is_admin = True
+        user.save()
+
+        return Response({"User role is changed": [user.email,user.first_name,user.is_admin]},status=status.HTTP_200_OK)

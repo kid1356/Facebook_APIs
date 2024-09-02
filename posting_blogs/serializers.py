@@ -22,7 +22,7 @@ class CommentSerializer(serializers.ModelSerializer):
             'blog_file':blog_file.url if blog_file else None,
             'blog_image':blog_image.url if blog_image else None,
             'blog_text' :blog.text,
-            'blog_username': blog.user.first_name
+            'blog_owner': blog.user.first_name
         }
 
 

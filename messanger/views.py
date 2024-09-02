@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .serializers import *
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -18,14 +19,33 @@ class MessageCreateView(APIView):
         serializer.save(sender = request.user)
         
         return Response({"msg created":serializer.data}, status=status.HTTP_201_CREATED)
-    
-# class GetMessageView(APIView):
-#     def get(self,request):
-#         messages = Messages.objects.all()
-#         serializer = MessageSerializer(messages, many = True)
+
+
+# getting chat conversation of two users   
+class GetMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
+        sender_id = request.query_params.get('sender_id')
+        receiver_id = request.query_params.get('receiver_id')
         
-#         return Response(serializer.data, status=status.HTTP_200_OK)
+        if not sender_id and not receiver_id:
+            return Response("sender_id and receiver_id both is needed",status=status.HTTP_400_BAD_REQUEST)
+        
+        user_id = request.user.id
+
+        if not (request.user.is_admin or user_id in [int(sender_id) , int(receiver_id)]):
+            raise PermissionDenied("You do not have permission to view these messages!")
+        
+        messages = Messages.objects.filter(models.Q(sender_id=sender_id) & models.Q(receiver_id=receiver_id) | 
+                                           models.Q(sender_id=receiver_id) & models.Q(receiver_id=sender_id)).order_by('id')
+        
+        serializer = MessageSerializer(messages, many = True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
+
+
+
 class ReceiverView(APIView):
     def get(self, request):
         # Filter messages where the current user is either the sender or receiver
@@ -34,6 +54,7 @@ class ReceiverView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+#Deleting messages
 class DeleteMessageView(APIView):
     def delete(self,request,id):
         message = get_object_or_404(Messages, id=id)
