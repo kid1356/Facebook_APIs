@@ -15,6 +15,7 @@ class Messages(models.Model):
     chat_type = models.CharField(max_length=200, choices=CHAT_TYPE, default='group')
     room_name = models.CharField(max_length=200, null=True, blank=True)
     time_stamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f'{self.sender} to {self.receiver if self.receiver else self.sender}: {self.text}{self.chat_type}'

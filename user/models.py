@@ -83,8 +83,8 @@ class User(AbstractBaseUser):
       # Simplest possible answer: All admins are staff
       return self.is_admin
     
-    def generated_otp_seceret_key(self):
-       if not self.secret_key:
-          secret_key = random_base32()
-          self.secret_key = secret_key
-          self.save()
+    # def generated_otp_seceret_key(self):
+    #    if not self.secret_key:
+    #       secret_key = random_base32()
+    #       self.secret_key = secret_key
+    #       self.save()

@@ -3,7 +3,17 @@ from .models import *
 # Register your models here.
 @admin.register(Comment)
 class CommentBlog(admin.ModelAdmin):
-    list_display = ['id','user','text','created_at']
+    list_display = ['id','user','text','created_at','blog_text','blog_owner']
+
+    def blog_text(self,obj):
+        return obj.blog.text
+    
+    blog_text.short_description = 'Blog Text'
+
+    def blog_owner(self,obj):
+        return obj.blog.user.first_name
+    
+    blog_owner.short_description = 'Blog Owner'
 
 @admin.register(Blogs)
 class BlogAdmin(admin.ModelAdmin):
