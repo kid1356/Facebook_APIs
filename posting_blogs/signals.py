@@ -27,6 +27,8 @@ def like_post(sender, instance, action, reverse,pk_set,**kwargs):
     if action == "post_add":
 
         liker_user_id = list(pk_set)[0]
+        print("pk.............",pk_set)
+        print("like...........................",liker_user_id)
         liker_user = User.objects.get(id=liker_user_id)
 
         author = instance.user

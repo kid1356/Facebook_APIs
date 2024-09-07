@@ -28,4 +28,4 @@ class BlogAdmin(admin.ModelAdmin):
 
 @admin.register(Notification)
 class notify(admin.ModelAdmin):
-    list_display = ['id','message']
+    list_display = ['id','message','is_read']
