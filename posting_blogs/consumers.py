@@ -18,8 +18,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         online_user.add(self.user.id)
 
         print("online user..........",online_user)
+
         self.group_name = f"notifications_{self.user.id}"
+
+        
         print(f"User {self.user} connected to room {self.group_name}")
+        
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name

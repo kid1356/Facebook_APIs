@@ -12,6 +12,9 @@ from user.models import User
 # Create your views here.
 
 
+def Group_private_chat_view(request,room_name,token):
+    return render(request, 'private_chat.html',{'room_name':room_name,'token':token})
+
 class MessageCreateView(APIView):
     def post(self, request,*args, **kwargs):
         serializer = MessageSerializer(data = request.data)

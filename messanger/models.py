@@ -12,6 +12,7 @@ class Messages(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages',null=True, blank= True)
     text = models.TextField(max_length=1000)
+    file = models.FileField(upload_to='files/',blank=True,null=True)
     chat_type = models.CharField(max_length=200, choices=CHAT_TYPE, default='group')
     room_name = models.CharField(max_length=200, null=True, blank=True)
     time_stamp = models.DateTimeField(auto_now_add=True)

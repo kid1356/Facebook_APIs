@@ -16,7 +16,7 @@ class CustomAuthMiddleware(BaseMiddleware):
     @database_sync_to_async
     def get_user(self,scope):
         query_string = str(scope['query_string'].decode('utf-8')).split("=")
-        # ["token","dlhsgukhsglhfsdlg"]
+       
         token = query_string[1]
         if token:
             try:

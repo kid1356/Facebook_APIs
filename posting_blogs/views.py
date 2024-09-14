@@ -54,7 +54,7 @@ class Blog_Get_view(APIView):
 
 
 # Updating blog 
-class Blog_Put_view(APIView):   
+class Blog_Patch_view(APIView):   
     permission_classes = [IsOwnerOfBlog]
     def patch(self, request,id):
         try:

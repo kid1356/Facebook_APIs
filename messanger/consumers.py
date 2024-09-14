@@ -5,6 +5,8 @@ from .models import Messages
 from user.models import User
 import os
 from cryptography.fernet import Fernet
+from django.core.files.base import ContentFile
+import base64
 
 
 online_users = set()
@@ -76,8 +78,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)    #receiving message
-        message = text_data_json['message']
-  
+        message = text_data_json.get('message','')
+        file_data = text_data_json.get('file',None)
+        file_name = text_data_json.get('fileName', None)
+
+         
+        
 
        
         # encrypting the received message
@@ -112,10 +118,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
 
 
-            message =  await self.save_message(self.user, message, is_read)
+            message =  await self.save_message(self.user, message,file_data,file_name,is_read)
         else:
  
-            message = await self.save_message(self.user, message,is_read = False)
+            message = await self.save_message(self.user, message,file_data,file_name,is_read = False)
  
 
            
@@ -124,7 +130,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 "type": "chat_message",
                 "message": encrypted_message,
-                "user": str(self.user.first_name)
+                "user": str(self.user.first_name),
+                "file":file_data,
             }
         )
     
@@ -143,17 +150,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(
             {
                 "message": decrypted_message,
-                "user": event["user"]
+                "user": event["user"],
+                "file": event.get("file"),
             }
         ))
+
     async def send_unread_message(self,message):                # sending unread messages to web socket
         encrypted_message = self.encrypt_message(message.text)          
         decrypted_message = self.decrypt_message(encrypted_message)
+        
+        file = message.file.url if message.file else None
+
 
         await self.send(text_data=json.dumps(
             {
                 "message":decrypted_message,
-                "user": str(message.sender.first_name)
+                "user": str(message.sender.first_name),
+                "file":file
+
             }
         ))
 
@@ -201,10 +215,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return True
 
     @database_sync_to_async
-    def save_message(self, user, message, is_read):
+    def save_message(self, user, message,file_data,file_name, is_read):
         receiver = None
         chat_type = 'group'
-                                                                #saving the mesasges in the database
+        file = None
+        
+        
+        if file_data:
+            file_format, filestr = file_data.split(';base64,')
+            extension = file_format.split('/')[-1]
+            original_file_name = file_name if file_name else f'default_file.{extension}'
+
+            file = ContentFile(base64.b64decode(filestr), name=original_file_name)
+
+
+
+
         if self.room_name.startswith("private_"):
             parts = self.room_name.split('_')
             if len(parts) == 3:  # private_<user1_id>_<user2_id>
@@ -221,15 +247,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     return
                 chat_type = 'private'
             else:
-                # Handle cases where the room name format is not as expected
-                return
+                
+                return "room format is not proper or not found"
+            
+             #saving the mesasges in the database
         Messages.objects.create(
             sender=user,
             receiver=receiver,
             text=message,
             chat_type=chat_type,
             room_name=self.room_name,
-            is_read = is_read
+            is_read = is_read,
+            file = file
+
         )
 
     @database_sync_to_async

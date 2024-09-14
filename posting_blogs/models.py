@@ -1,6 +1,5 @@
 from django.db import models
 from user.models import User
-from multiupload.fields import MultiImageField
 # Create your models here.
 
 class Comment(models.Model):
