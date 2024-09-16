@@ -29,3 +29,8 @@ class BlogAdmin(admin.ModelAdmin):
 @admin.register(Notification)
 class notify(admin.ModelAdmin):
     list_display = ['id','message','is_read']
+
+
+@admin.register(Followers)
+class followers(admin.ModelAdmin):
+    list_display = ['id','user','followed_user','created_at']

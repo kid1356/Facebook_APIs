@@ -8,12 +8,13 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .utils import generate_private_room_name
 from user.models import User
+from rest_framework.pagination import PageNumberPagination
 
 # Create your views here.
 
 
-def Group_private_chat_view(request,room_name,token):
-    return render(request, 'private_chat.html',{'room_name':room_name,'token':token})
+def Group_private_chat_view(request,room_name):
+    return render(request, 'private_chat.html',{'room_name':room_name})
 
 class MessageCreateView(APIView):
     def post(self, request,*args, **kwargs):
@@ -35,16 +36,20 @@ class GetMessageView(APIView):
             return Response("sender_id and receiver_id both is needed",status=status.HTTP_400_BAD_REQUEST)
         
         user_id = request.user.id
+        print('User.........',user_id)
 
         if not (request.user.is_admin or user_id in [int(sender_id) , int(receiver_id)]):
             raise PermissionDenied("You do not have permission to view these messages!")
         
         messages = Messages.objects.filter(models.Q(sender_id=sender_id) & models.Q(receiver_id=receiver_id) | 
                                            models.Q(sender_id=receiver_id) & models.Q(receiver_id=sender_id)).order_by('id')
+         
+        pagenator = PageNumberPagination()
+        pagenator.page_size = 3
+        result = pagenator.paginate_queryset(messages, request)
+        serializer = MessageSerializer(result, many = True)
         
-        serializer = MessageSerializer(messages, many = True)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return pagenator.get_paginated_response(serializer.data)
     
 
 

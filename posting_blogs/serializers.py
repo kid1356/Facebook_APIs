@@ -56,3 +56,11 @@ class BlogLikeSerializer(serializers.Serializer):
     
 
    
+class FollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Followers
+        fields = ['user','followed_user','created_at']
+
+        extra_kwargs = {
+            'user':{'read_only':True}
+        }

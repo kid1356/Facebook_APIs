@@ -135,13 +135,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const roomName = "{{ room_name }}";
-            const token = "{{ token }}";
+            const roomName = "{{ room_name }}"; // Server-side rendered variable
+            const token = localStorage.getItem('token');
 
-            const socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/private/${roomName}/?token=${token}`);
+            const socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/private/${roomName}/`);
 
             socket.onopen = () => {
                 console.log("Connected to the WebSocket.");
+                socket.send(JSON.stringify({ token: `Bearer ${token}` })); // Send token on connection
             };
 
             socket.onmessage = (event) => {

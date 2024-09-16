@@ -3,6 +3,7 @@ from user.views import *
 from .serializers import *
 from .models import *
 from rest_framework.pagination import PageNumberPagination
+from user.serializers import UserProfileSerializer
 
 #custom permissions
 class IsOwnerOfBlog(BasePermission):
@@ -176,3 +177,62 @@ class Comment_Delete_view(APIView):
         return Response({'the comment is deleted':serializer_data},status=status.HTTP_200_OK)
       except Comment.DoesNotExist:
             return Response("comment does not found", status=status.HTTP_404_NOT_FOUND)
+      
+
+class User_Follow_UnFollow_View(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request):
+        serializer = FollowSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        followed_user_id = serializer.validated_data['followed_user'].id
+        user = request.user
+        
+        try:
+            followed_user = User.objects.get(id = followed_user_id)
+        except User.DoesNotExist:
+            return Response("User Not found",status=status.HTTP_404_NOT_FOUND)
+        
+        followed = Followers.objects.filter(user = user, followed_user = followed_user)
+
+        if followed.exists():
+            followed.delete()
+            message = "Unfollow Successfully"
+        else:
+            Followers.objects.create(user =user, followed_user=followed_user)
+            message = "Follow Successfully"
+
+        return Response({"message":message},status=status.HTTP_200_OK)
+
+        
+
+class GetFollowersView(APIView):
+    def get(self,request):
+        user = request.user
+        follower = Followers.objects.filter(followed_user = user)
+
+        followed_users = [f.user for f in follower]
+        paginator = PageNumberPagination()
+        paginator.page_size = 3
+        result = paginator.paginate_queryset(followed_users, request)
+
+        serializer = UserProfileSerializer(result, many =True)
+        # return paginator.get_paginated_response(follower.count(), serializer.data )___
+        return Response(paginator.get_paginated_response(serializer.data).data,status=status.HTTP_200_OK)
+
+       
+class FollowingView(APIView):
+    def get(self,request):
+        user = request.user
+        following = Followers.objects.filter(user = user)
+
+        following_users = [f.followed_user for f in following]
+        
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 3
+        result =paginator.paginate_queryset(following_users,request)
+        serializer = UserProfileSerializer(result, many = True)
+
+        return Response(paginator.get_paginated_response(serializer.data).data,status=status.HTTP_200_OK)
+

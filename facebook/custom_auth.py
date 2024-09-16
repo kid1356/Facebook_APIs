@@ -15,9 +15,12 @@ class CustomAuthMiddleware(BaseMiddleware):
     
     @database_sync_to_async
     def get_user(self,scope):
-        query_string = str(scope['query_string'].decode('utf-8')).split("=")
-       
-        token = query_string[1]
+        token = None
+
+        for key, value in scope['headers']:
+            if key == b'authorization':
+                token = value.decode().split(' ')[1]
+                
         if token:
             try:
                 access_token = AccessToken(token)
