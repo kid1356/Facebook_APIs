@@ -1,17 +1,29 @@
-# version: '3.9'
+version: '3.9'
 
 services:
-  web:
+  backend:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/facebook
     ports:
       - "8000:8000"
     environment:
       - DJANGO_SETTINGS_MODULE=facebook.settings
+
     depends_on:
       - redis
+      - database
+    
 
   redis:
     image: redis:alpine
+    ports:
+      - '6379:6379'
+
+  database:
+    image: mysql:8.0
+    ports:
+      - '3307:3306'
+
+

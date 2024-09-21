@@ -12,6 +12,8 @@ class UserManager(BaseUserManager):
         user = self.model(
             email = self.normalize_email(email),
             username = username,
+            first_name = first_name,
+            gender =gender
            
             
            

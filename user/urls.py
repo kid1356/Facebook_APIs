@@ -11,7 +11,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name = 'register'),
     path('login/', LoginView.as_view(), name = 'login'),
     path('change-password/', ChangePasswordView.as_view(), name = 'change-password'),
-    path('update/<int:id>/', UpdateUserInfoView.as_view(), name = 'update-info'),
+    path('update/', UpdateUserInfoView.as_view(), name = 'update-info'),
     path('forget-password-email/', ForgetPasswordEmailView.as_view(), name = 'send-email'),
     path('forget-password/', ForgetPasswordView.as_view(), name = 'forget-password-recovery'),
     path('verify-otp/', OTPConfirmationView.as_view(), name = 'otp-confirmed'),
@@ -24,6 +24,10 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+
+    #front-end url
+
+    path('front-login/',login, name= "login-front")
     
     
 ]

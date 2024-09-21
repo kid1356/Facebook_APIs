@@ -16,3 +16,13 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_receiver_name(self,obj):
         receiver = obj.receiver
         return receiver.first_name if receiver else None
+    
+
+class RoomMessageSerializer(serializers.ModelSerializer):
+    last_message = serializers.CharField( )
+    last_message_time = serializers.DateTimeField()
+    class Meta:
+        model = Messages
+        fields=['room_name','chat_type', 'last_message','last_message_time']
+
+

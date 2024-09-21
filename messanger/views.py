@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from .utils import generate_private_room_name
 from user.models import User
 from rest_framework.pagination import PageNumberPagination
+from django.db.models import Max
 
 # Create your views here.
 
@@ -25,32 +26,46 @@ class MessageCreateView(APIView):
         return Response({"msg created":serializer.data}, status=status.HTTP_201_CREATED)
 
 
-# getting chat conversation of two users   
-class GetMessageView(APIView):
+    
+
+class GetListOfChatsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        sender_id = request.query_params.get('sender_id')
-        receiver_id = request.query_params.get('receiver_id')
+        chats = Messages.objects.filter(models.Q(sender= request.user) 
+        | models.Q(receiver = request.user)).values('room_name','chat_type').annotate(
+            last_message=Max('text'),
+            last_message_time= Max('time_stamp')
+            ).order_by('-last_message_time')
         
-        if not sender_id and not receiver_id:
-            return Response("sender_id and receiver_id both is needed",status=status.HTTP_400_BAD_REQUEST)
-        
-        user_id = request.user.id
-        print('User.........',user_id)
+        if chats:
+            paginator = PageNumberPagination()
+            paginator.page_size = 3
+            result = paginator.paginate_queryset(chats, request)
+            
+            serializer = RoomMessageSerializer(result, many = True)
 
-        if not (request.user.is_admin or user_id in [int(sender_id) , int(receiver_id)]):
-            raise PermissionDenied("You do not have permission to view these messages!")
-        
-        messages = Messages.objects.filter(models.Q(sender_id=sender_id) & models.Q(receiver_id=receiver_id) | 
-                                           models.Q(sender_id=receiver_id) & models.Q(receiver_id=sender_id)).order_by('id')
-         
-        pagenator = PageNumberPagination()
-        pagenator.page_size = 3
-        result = pagenator.paginate_queryset(messages, request)
-        serializer = MessageSerializer(result, many = True)
-        
-        return pagenator.get_paginated_response(serializer.data)
+            return Response(paginator.get_paginated_response(serializer.data).data, status=status.HTTP_200_OK)
+        else:
+            return Response("No Chats Found",status=status.HTTP_404_NOT_FOUND)
+
+
+class GetAllRoomChatView(APIView):
+    permission_classes = [IsAuthenticated]
     
+    def get(self, request, room_name):
+        chats = Messages.objects.filter(room_name =room_name).order_by('time_stamp')
+
+        if chats:
+            paginator = PageNumberPagination()
+            paginator.page_size = 3
+            result =paginator.paginate_queryset(chats, request)
+
+            serializer = MessageSerializer(result, many = True)
+
+            return Response(paginator.get_paginated_response(serializer.data).data, status=status.HTTP_200_OK)
+        
+        else:
+            return Response("No Chat Messages found", status=status.HTTP_404_NOT_FOUND)
 
 
 

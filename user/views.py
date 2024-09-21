@@ -9,6 +9,10 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .permissions import *
 # Create your views here.
 
+def login(request):
+    return render(request, 'login.html')
+
+
 def generated_token(user):
     refresh = RefreshToken.for_user(user)      #token for every user 
 
@@ -52,11 +56,8 @@ class LoginView(APIView):
 
 class UpdateUserInfoView(APIView):
     permission_classes =[IsAuthenticated, IsOwner]
-    def patch(self, request,id):
-        try:
-            user = User.objects.get(id=id)
-        except User.DoesNotExist:
-            return Response("No User is found!", status=status.HTTP_404_NOT_FOUND)
+    def patch(self, request):
+        user = request.user
         
         self.check_object_permissions(request, user)
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +15,12 @@
             align-items: center;
             height: 100vh;
         }
+
         h2 {
             text-align: center;
             color: #075E54;
         }
+
         #chat-container {
             width: 100%;
             max-width: 500px;
@@ -28,6 +31,7 @@
             flex-direction: column;
             overflow: hidden;
         }
+
         #messages {
             padding: 20px;
             height: 400px;
@@ -38,19 +42,23 @@
             background-color: #e5ddd5;
             border-bottom: 1px solid #ccc;
         }
+
         .message-wrapper {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             max-width: 70%;
         }
+
         .message-wrapper.left {
             align-self: flex-start;
         }
+
         .message-wrapper.right {
             align-self: flex-end;
             align-items: flex-end;
         }
+
         .message-bubble {
             padding: 12px;
             border-radius: 10px;
@@ -59,26 +67,34 @@
             font-size: 14px;
             position: relative;
         }
+
         .message-bubble.left {
             background-color: #fff;
             border: 1px solid #ddd;
         }
+
         .message-bubble.right {
             background-color: #dcf8c6;
         }
+
         .message-author {
             font-size: 12px;
             margin-bottom: 5px;
             color: #555;
         }
-        img, video, audio {
+
+        img,
+        video,
+        audio {
             max-width: 200px;
             margin-top: 5px;
         }
+
         a {
             display: block;
             color: #34B7F1;
         }
+
         #input-container {
             display: flex;
             align-items: center;
@@ -86,6 +102,7 @@
             background-color: #fff;
             gap: 10px;
         }
+
         #messageInput {
             flex: 1;
             padding: 10px;
@@ -94,6 +111,7 @@
             border: 1px solid #ccc;
             outline: none;
         }
+
         #sendButton {
             background-color: #25D366;
             border: none;
@@ -104,12 +122,15 @@
             font-size: 16px;
             outline: none;
         }
+
         #sendButton:hover {
             background-color: #128C7E;
         }
+
         #mediaInput {
             display: none;
         }
+
         label[for="mediaInput"] {
             cursor: pointer;
             background-color: #34B7F1;
@@ -121,6 +142,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="chat-container">
         <h2>Chat Room</h2>
@@ -136,13 +158,27 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const roomName = "{{ room_name }}"; // Server-side rendered variable
-            const token = localStorage.getItem('token');
+            // console.log(roomName,"____________________");
 
-            const socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/private/${roomName}/`);
+            // Function to get a specific cookie value
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            const token = getCookie('token');
+            
+
+
+            // const token = localStorage.getItem('token');
+            // const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2NjUwMTYyLCJpYXQiOjE3MjY1NjM3NjIsImp0aSI6IjFiZTExNWI5NmJkYzRjMzZiZmQzMTQ0Y2MyZWYwMDhkIiwidXNlcl9pZCI6MX0.4gFQE0wzsGMX1nRc6kbVORrGSGW5EB_S26ZshJlZJG8";
+
+            const socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/private/${roomName}/?token=${token}`);
 
             socket.onopen = () => {
+                socket.send(JSON.stringify({ token: token, type: 'authenticate' })); // Send token on connection
                 console.log("Connected to the WebSocket.");
-                socket.send(JSON.stringify({ token: `Bearer ${token}` })); // Send token on connection
             };
 
             socket.onmessage = (event) => {
@@ -227,4 +263,5 @@
         });
     </script>
 </body>
+
 </html>
